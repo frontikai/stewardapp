@@ -1,0 +1,106 @@
+Product Requirements Document (PRD)
+Product Name: Stewardship Keeper (Tentative)
+
+Version: 1.0
+
+Date: [Insert Date]
+
+Prepared by: [Your Name]
+
+1. Introduction
+1.1 Purpose
+"Stewardship Keeper" is a mobile app designed to help Christians manage their financial stewardship, focusing on tithes and offerings. It simplifies donation tracking, provides gentle reminders, and offers optional income tracking for tithe calculations, all within a beautiful Material Design 3 interface.
+
+1.2 Target Audience
+Christians aiming to track tithes and offerings.
+Users needing reminders for consistent giving.
+Individuals seeking a faith-aligned, visually appealing stewardship tool.
+1.3 Key Objectives
+Simplify donation logging and tracking.
+Provide encouraging, customizable reminders.
+Enable optional income tracking with tithe suggestions.
+Deliver an intuitive, modern design.
+Promote generosity with a grace-focused experience.
+2. Features and Functionality
+2.1 Core Features
+2.1.1 Tithe and Offering Logging
+Description: Quick and easy donation logging.
+Fields: Amount, Date (default: today), Type (Tithe, Offering, etc.), Recipient (Church, Charity, etc.), Notes.
+Recurring Gifts: Set recurring donations with reminders.
+2.1.2 Smart Reminders
+Custom Schedules: User-defined frequency (e.g., weekly).
+Intelligent Timing: Pre-giving day notifications.
+Actionable Notifications: Log or snooze via push notifications.
+Pending Tithe Alerts: Gentle reminders for outstanding tithes (if income tracking is enabled).
+2.1.3 Optional Income Tracking and Tithe Calculation
+Income Logging: Amount, Date, Source, Frequency; opt-in with local storage.
+Tithe Calculation: Adjustable percentage (default: 10%), auto-calculates suggested tithe.
+Pending Tithe Management: Tracks and allows marking as given.
+2.1.4 Dashboard and Reporting
+Home Screen: Greeting, summary cards (This Month’s Giving, Pending Tithe), quick actions.
+Reports Screen: Goals with progress bars, charts (Giving Over Time, by Recipient), export option.
+2.1.5 Recipient Management
+Description: Add/edit recipients with optional details.
+2.2 Additional Features
+Scripture Integration: Rotating encouraging verses.
+Security: Optional PIN/biometric lock.
+Currency Support: Multi-currency selection.
+Data Export: Donation history export.
+3. User Interface and Experience
+3.1 Design Principles
+Material Design 3 (M3): Dynamic colors, modern components.
+Tone: Warm, encouraging, scripturally grounded.
+Simplicity: Clean, intuitive layouts.
+3.2 Screen Flow
+Splash Screen & Onboarding: Purpose overview, permissions, optional setup.
+Home Screen: Greeting, summaries, actions.
+Giving Screen: Donation log, pending tithes, FAB for new entries.
+Income Screen (Optional): Income log, FAB.
+Reports Screen: Goals, charts.
+Entry Screens: Dialogs for donation/income logging.
+Settings Screen: Notifications, tithe %, privacy options.
+3.3 Encouraging Elements
+Gentle reminders, positive messaging, scripture integration.
+4. Technical Requirements
+4.1 Platform
+Primary: Android (future iOS possible).
+Development Framework: The app will be developed using Expo 52, the latest version of Expo. The development team must install Expo 52 to ensure compatibility and access to the latest features.
+4.2 Development Environment
+Expo Installation:
+Install Expo 52 using the Expo CLI (npm install -g expo-cli, then expo init with Expo 52).
+Verify the version with expo --version to confirm Expo 52 is in use.
+Workflow:
+Use Expo CLI for project setup, development, and testing.
+Manage dependencies via Expo to ensure cross-platform support.
+Modules and APIs:
+Utilize Expo 52 modules like expo-notifications (reminders), expo-secure-store (data security), and expo-sqlite (local storage).
+4.3 Design System
+Material Design 3 (M3): Implement using Expo’s React Native support, styled with M3 guidelines.
+4.4 Data Storage
+Local: Use expo-sqlite or expo-file-system for privacy.
+Cloud (Optional): Encrypted backups via expo-secure-store.
+4.5 Security
+Protection: Implement expo-local-authentication for PIN/biometric locks.
+Privacy: Local-first storage for income data.
+4.6 Notifications
+Push Notifications: Use expo-notifications for reminders.
+4.7 Development Practices
+Version Control: Git with feature branches.
+Testing: Expo’s expo-dev-client for cross-platform testing.
+CI/CD: Optional Expo EAS for automated builds.
+4.8 Expo 52 Considerations
+Compatibility: Verify third-party libraries work with Expo 52.
+Performance: Optimize for data-intensive features.
+Updates: Monitor Expo 52 changes for new features or adjustments.
+5. Non-Functional Requirements
+5.1 Performance
+Fast, responsive UI using Expo’s optimized rendering.
+5.2 Accessibility
+Follow M3 accessibility guidelines with Expo support.
+5.3 Localization
+English initially, expandable via Expo tools.
+6. Future Considerations
+Pledge tracking, prayer integration, community features.
+7. Success Metrics
+Engagement, retention, user feedback.
+This updated PRD ensures "Stewardship Keeper" is built with Expo 52, the latest version, by specifying its installation and use throughout the technical requirements. The development team will install Expo 52 via the Expo CLI and leverage its features and best practices, ensuring a robust, cross-platform app that aligns with the project’s goals. Let me know if you need further refinements!
