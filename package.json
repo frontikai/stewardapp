@@ -1,0 +1,36 @@
+{
+  "name": "workspace",
+  "version": "1.0.0",
+  "main": "App.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@expo/metro-runtime": "^4.0.1",
+    "@react-native-async-storage/async-storage": "^2.1.2",
+    "@react-native-community/datetimepicker": "^8.3.0",
+    "@react-navigation/bottom-tabs": "^7.3.10",
+    "@react-navigation/native": "^7.1.6",
+    "@react-navigation/stack": "^7.2.10",
+    "expo": "^52.0.44",
+    "expo-device": "^7.0.3",
+    "expo-file-system": "^18.0.12",
+    "expo-font": "^13.0.4",
+    "expo-local-authentication": "^15.0.2",
+    "expo-notifications": "^0.29.14",
+    "expo-sharing": "^13.0.1",
+    "expo-splash-screen": "^0.29.22",
+    "expo-sqlite": "^15.1.4",
+    "expo-status-bar": "^2.0.1",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-native": "^0.79.0",
+    "react-native-paper": "^5.13.1",
+    "react-native-reanimated": "^3.17.3",
+    "react-native-web": "^0.20.0"
+  }
+}
