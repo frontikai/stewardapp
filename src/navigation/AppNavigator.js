@@ -132,7 +132,7 @@ const AuthScreen = ({ navigation }) => {
 };
 
 // Root navigator
-const AppNavigator = ({ hasOnboarded }) => {
+const AppNavigator = ({ hasOnboarded, onOnboardingComplete }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(true);
   const [securityEnabled, setSecurityEnabled] = useState(false);
   
@@ -162,7 +162,9 @@ const AppNavigator = ({ hasOnboarded }) => {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {!hasOnboarded ? (
-        <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+        <Stack.Screen name="Onboarding">
+          {(props) => <OnboardingScreen {...props} onOnboardingComplete={onOnboardingComplete} />}
+        </Stack.Screen>
       ) : securityEnabled && !isAuthenticated ? (
         <Stack.Screen name="Auth" component={AuthScreen} />
       ) : (

@@ -169,12 +169,12 @@ const ReportsScreen = () => {
             </View>
             <View style={styles.progressContainer}>
               <ProgressBar 
-                progress={donationTotal / donationGoal} 
+                progress={donationGoal > 0 ? donationTotal / donationGoal : 0} 
                 color={theme.colors.primary}
               />
               <Text style={styles.progressText}>
                 {settings.currency} {donationTotal.toFixed(2)} / {settings.currency} {donationGoal.toFixed(2)}
-                {' '}({Math.round((donationTotal / donationGoal) * 100)}%)
+                {' '}({donationGoal > 0 ? Math.round((donationTotal / donationGoal) * 100) : 0}%)
               </Text>
             </View>
           </View>
@@ -190,12 +190,12 @@ const ReportsScreen = () => {
             </View>
             <View style={styles.progressContainer}>
               <ProgressBar 
-                progress={yearlyTotal / yearlyGoal} 
+                progress={yearlyGoal > 0 ? yearlyTotal / yearlyGoal : 0} 
                 color={theme.colors.secondary}
               />
               <Text style={styles.progressText}>
                 {settings.currency} {yearlyTotal.toFixed(2)} / {settings.currency} {yearlyGoal.toFixed(2)}
-                {' '}({Math.round((yearlyTotal / yearlyGoal) * 100)}%)
+                {' '}({yearlyGoal > 0 ? Math.round((yearlyTotal / yearlyGoal) * 100) : 0}%)
               </Text>
             </View>
           </View>

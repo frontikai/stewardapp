@@ -20,7 +20,7 @@ export const SCHEMA = {
   recipients: {
     id: 'INTEGER PRIMARY KEY AUTOINCREMENT',
     name: 'TEXT NOT NULL',
-    category: 'TEXT NOT NULL',
+    type: 'TEXT NOT NULL',
     notes: 'TEXT',
     isDefault: 'INTEGER DEFAULT 0',
     createdAt: 'TEXT DEFAULT CURRENT_TIMESTAMP',

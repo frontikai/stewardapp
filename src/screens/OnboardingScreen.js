@@ -22,7 +22,7 @@ import { updateSetting } from '../database/Database';
 
 const { width } = Dimensions.get('window');
 
-const OnboardingScreen = ({ navigation }) => {
+const OnboardingScreen = ({ navigation, onOnboardingComplete }) => {
   const theme = useTheme();
   const { updateSettings } = useContext(AppContext);
   const [currentPage, setCurrentPage] = useState(0);
@@ -115,11 +115,10 @@ const OnboardingScreen = ({ navigation }) => {
       // Mark onboarding as completed
       await AsyncStorage.setItem('hasOnboarded', 'true');
       
-      // Navigate to the main app
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Main' }],
-      });
+      // Notify parent that onboarding is done (triggers re-render to show MainTabs)
+      if (onOnboardingComplete) {
+        onOnboardingComplete();
+      }
     } catch (error) {
       console.error('Error completing onboarding:', error);
     }
