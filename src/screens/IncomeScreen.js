@@ -106,8 +106,8 @@ const IncomeScreen = ({ navigation, route }) => {
   
   const filteredIncome = income.filter(item => {
     if (filter === 'all') return true;
-    if (filter === 'pending') return item.processed === 0;
-    if (filter === 'processed') return item.processed === 1;
+    if (filter === 'pending') return !item.processed;
+    if (filter === 'processed') return item.processed;
     return true;
   });
   
@@ -153,14 +153,14 @@ const IncomeScreen = ({ navigation, route }) => {
             title={incomeItem.source || "Income"}
             description={`${incomeItem.date}${incomeItem.notes ? `\n${incomeItem.notes}` : ''}`}
             left={props => (
-              <List.Icon {...props} icon={incomeItem.processed === 1 ? "check-circle" : "circle"} />
+              <List.Icon {...props} icon={incomeItem.processed ? "check-circle" : "circle"} />
             )}
             right={props => (
               <View style={styles.rightContent}>
                 <Text style={styles.amountText}>
                   {settings.currency} {incomeItem.amount.toFixed(2)}
                 </Text>
-                {incomeItem.processed === 0 && (
+                {!incomeItem.processed && (
                   <IconButton
                     icon="cash"
                     size={20}

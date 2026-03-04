@@ -3,7 +3,6 @@ import { View, Text, ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { Provider as PaperProvider } from 'react-native-paper';
 import * as SplashScreen from 'expo-splash-screen';
-import * as Font from 'expo-font';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StatusBar } from 'expo-status-bar';
 
@@ -33,11 +32,8 @@ export default function App() {
         // Register for push notifications
         await registerForPushNotifications();
         
-        // Load fonts or other assets
-        await Font.loadAsync({
-          'Roboto-Regular': require('expo-font/build/Roboto/Roboto.ttf'),
-          'Roboto-Medium': require('expo-font/build/Roboto/Roboto_medium.ttf'),
-        });
+        // Load fonts if needed (React Native Paper handles its own fonts)
+        // Custom fonts can be added here if required
       } catch (e) {
         console.warn(e);
       } finally {
