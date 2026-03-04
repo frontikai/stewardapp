@@ -19,7 +19,7 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.yourcompany.stewardshipkeeper",
+      "bundleIdentifier": "com.frontikai.stewardshipkeeper",
       "buildNumber": "1.0.0",
       "infoPlist": {
         "NSFaceIDUsageDescription": "This app uses Face ID to secure your giving information."
@@ -30,7 +30,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       },
-      "package": "com.yourcompany.stewardshipkeeper",
+      "package": "com.frontikai.stewardshipkeeper",
       "versionCode": 1,
       "permissions": [
         "USE_FINGERPRINT",

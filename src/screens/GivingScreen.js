@@ -261,6 +261,7 @@ const GivingScreen = ({ navigation, route }) => {
       <FAB
         style={[styles.fab, { backgroundColor: theme.colors.primary }]}
         icon="plus"
+        accessibilityLabel="Add new donation"
         onPress={() => {
           setEditingDonation(null);
           setShowDonationForm(true);

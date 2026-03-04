@@ -311,6 +311,7 @@ const IncomeScreen = ({ navigation, route }) => {
       <FAB
         style={[styles.fab, { backgroundColor: theme.colors.primary }]}
         icon="plus"
+        accessibilityLabel="Add new income"
         onPress={() => {
           setEditingIncome(null);
           setShowIncomeForm(true);

@@ -19,7 +19,7 @@ const ScriptureCard = () => {
   };
 
   return (
-    <Card style={styles.card}>
+    <Card style={styles.card} accessible={true} accessibilityRole="text">
       <Card.Content>
         <View style={styles.header}>
           <Text style={styles.title}>Scripture of the Day</Text>
