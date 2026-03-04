@@ -39,9 +39,9 @@ const ReportsScreen = () => {
   const [yearlyTotal, setYearlyTotal] = useState(0);
   const [yearlyGoal, setYearlyGoal] = useState(0);
   
-  // Set some sample goals - in real app these would be saved in settings
-  const monthlyGoal = 500;
-  const annualGoal = 6000;
+  // Configurable goals from settings
+  const monthlyGoal = parseFloat(settings.monthlyGoal) || 500;
+  const annualGoal = parseFloat(settings.annualGoal) || 6000;
   
   const loadData = async () => {
     try {
