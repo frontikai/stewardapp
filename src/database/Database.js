@@ -1,6 +1,7 @@
 import * as SQLite from 'expo-sqlite';
 import { Platform } from 'react-native';
 import { SCHEMA } from './schema';
+import logger from '../utils/logger';
 
 // Get the database instance using the new expo-sqlite API
 let db = null;
@@ -40,7 +41,7 @@ export const initDatabase = async () => {
       await database.execAsync(
         `CREATE TABLE IF NOT EXISTS ${tableName} (${columns})`
       );
-      console.log(`Table ${tableName} created or already exists`);
+      logger.log(`Table ${tableName} created or already exists`);
     }
 
     // Insert default settings if they don't exist
@@ -57,12 +58,12 @@ export const initDatabase = async () => {
         `INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)`,
         setting.key, setting.value
       );
-      console.log(`Default setting ${setting.key} inserted or already exists`);
+      logger.log(`Default setting ${setting.key} inserted or already exists`);
     }
 
-    console.log('Database initialized successfully');
+    logger.log('Database initialized successfully');
   } catch (error) {
-    console.error('Error during database initialization:', error);
+    logger.error('Error during database initialization:', error);
     throw error;
   }
 };
@@ -87,7 +88,7 @@ export const addDonation = async (donation) => {
     );
     return result.lastInsertRowId;
   } catch (error) {
-    console.error('Error adding donation:', error);
+    logger.error('Error adding donation:', error);
     throw error;
   }
 };
@@ -111,7 +112,7 @@ export const getDonations = async (startDate, endDate) => {
     );
     return rows;
   } catch (error) {
-    console.error('Error getting donations:', error);
+    logger.error('Error getting donations:', error);
     throw error;
   }
 };
@@ -145,7 +146,7 @@ export const getDonationTotal = async (startDate, endDate) => {
     );
     return row?.total || 0;
   } catch (error) {
-    console.error('Error getting donation total:', error);
+    logger.error('Error getting donation total:', error);
     throw error;
   }
 };
@@ -169,7 +170,7 @@ export const addIncome = async (income) => {
     );
     return result.lastInsertRowId;
   } catch (error) {
-    console.error('Error adding income:', error);
+    logger.error('Error adding income:', error);
     throw error;
   }
 };
@@ -193,7 +194,7 @@ export const getIncome = async (startDate, endDate) => {
       processed: record.processed === 1,
     }));
   } catch (error) {
-    console.error('Error getting income records:', error);
+    logger.error('Error getting income records:', error);
     throw error;
   }
 };
@@ -211,7 +212,7 @@ export const markIncomeAsProcessed = async (incomeId) => {
       incomeId
     );
   } catch (error) {
-    console.error('Error marking income as processed:', error);
+    logger.error('Error marking income as processed:', error);
     throw error;
   }
 };
@@ -236,7 +237,7 @@ export const getPendingTitheTotal = async () => {
     const total = incomeRow?.total || 0;
     return total * tithePercentage;
   } catch (error) {
-    console.error('Error getting pending tithe total:', error);
+    logger.error('Error getting pending tithe total:', error);
     throw error;
   }
 };
@@ -250,16 +251,16 @@ export const addRecipient = async (recipient) => {
   const database = getDatabase();
   try {
     const result = await database.runAsync(
-      `INSERT INTO recipients (name, category, notes, isDefault) 
+      `INSERT INTO recipients (name, type, notes, isDefault) 
        VALUES (?, ?, ?, ?)`,
       recipient.name,
-      recipient.category,
+      recipient.type,
       recipient.notes || '',
       recipient.isDefault ? 1 : 0
     );
     return result.lastInsertRowId;
   } catch (error) {
-    console.error('Error adding recipient:', error);
+    logger.error('Error adding recipient:', error);
     throw error;
   }
 };
@@ -280,7 +281,7 @@ export const getRecipients = async () => {
       isDefault: recipient.isDefault === 1,
     }));
   } catch (error) {
-    console.error('Error getting recipients:', error);
+    logger.error('Error getting recipients:', error);
     throw error;
   }
 };
@@ -295,16 +296,16 @@ export const updateRecipient = async (recipient) => {
   try {
     await database.runAsync(
       `UPDATE recipients 
-       SET name = ?, category = ?, notes = ?, isDefault = ? 
+       SET name = ?, type = ?, notes = ?, isDefault = ? 
        WHERE id = ?`,
       recipient.name,
-      recipient.category,
+      recipient.type,
       recipient.notes || '',
       recipient.isDefault ? 1 : 0,
       recipient.id
     );
   } catch (error) {
-    console.error('Error updating recipient:', error);
+    logger.error('Error updating recipient:', error);
     throw error;
   }
 };
@@ -323,7 +324,7 @@ export const getSetting = async (key) => {
     );
     return row?.value || null;
   } catch (error) {
-    console.error(`Error getting setting ${key}:`, error);
+    logger.error(`Error getting setting ${key}:`, error);
     throw error;
   }
 };
@@ -340,7 +341,7 @@ export const getAllSettings = async () => {
     );
     return rows;
   } catch (error) {
-    console.error('Error getting all settings:', error);
+    logger.error('Error getting all settings:', error);
     throw error;
   }
 };
@@ -359,7 +360,7 @@ export const updateSetting = async (key, value) => {
       key, value
     );
   } catch (error) {
-    console.error(`Error updating setting ${key}:`, error);
+    logger.error(`Error updating setting ${key}:`, error);
     throw error;
   }
 };
@@ -387,7 +388,7 @@ export const addReminder = async (reminder) => {
     );
     return result.lastInsertRowId;
   } catch (error) {
-    console.error('Error adding reminder:', error);
+    logger.error('Error adding reminder:', error);
     throw error;
   }
 };
@@ -408,7 +409,7 @@ export const getReminders = async () => {
       enabled: reminder.enabled === 1,
     }));
   } catch (error) {
-    console.error('Error getting reminders:', error);
+    logger.error('Error getting reminders:', error);
     throw error;
   }
 };
@@ -438,7 +439,7 @@ export const updateReminder = async (reminder) => {
       reminder.id
     );
   } catch (error) {
-    console.error('Error updating reminder:', error);
+    logger.error('Error updating reminder:', error);
     throw error;
   }
 };
@@ -456,7 +457,7 @@ export const deleteReminder = async (id) => {
       id
     );
   } catch (error) {
-    console.error('Error deleting reminder:', error);
+    logger.error('Error deleting reminder:', error);
     throw error;
   }
 };

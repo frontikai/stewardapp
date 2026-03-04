@@ -8,6 +8,7 @@ import { StatusBar } from 'expo-status-bar';
 
 import { AppContextProvider } from './src/context/AppContext';
 import AppNavigator from './src/navigation/AppNavigator';
+import ErrorBoundary from './src/components/ErrorBoundary';
 import { theme } from './src/theme/theme';
 import { initDatabase } from './src/database/Database';
 import { registerForPushNotifications } from './src/utils/notifications';
@@ -31,11 +32,10 @@ export default function App() {
         
         // Register for push notifications
         await registerForPushNotifications();
-        
-        // Load fonts if needed (React Native Paper handles its own fonts)
-        // Custom fonts can be added here if required
       } catch (e) {
-        console.warn(e);
+        if (__DEV__) {
+          console.warn('App initialization error:', e);
+        }
       } finally {
         setAppIsReady(true);
       }
@@ -55,13 +55,18 @@ export default function App() {
   }
 
   return (
-    <AppContextProvider>
-      <PaperProvider theme={theme}>
-        <NavigationContainer onReady={onLayoutRootView}>
-          <StatusBar style="auto" />
-          <AppNavigator hasOnboarded={hasOnboarded} />
-        </NavigationContainer>
-      </PaperProvider>
-    </AppContextProvider>
+    <ErrorBoundary>
+      <AppContextProvider>
+        <PaperProvider theme={theme}>
+          <NavigationContainer onReady={onLayoutRootView}>
+            <StatusBar style="auto" />
+            <AppNavigator 
+              hasOnboarded={hasOnboarded} 
+              onOnboardingComplete={() => setHasOnboarded(true)}
+            />
+          </NavigationContainer>
+        </PaperProvider>
+      </AppContextProvider>
+    </ErrorBoundary>
   );
 }

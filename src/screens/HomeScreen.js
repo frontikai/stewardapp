@@ -1,13 +1,53 @@
-import React from 'react';
+import React, { useState, useContext, useCallback } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { Text, Card, Button, useTheme } from 'react-native-paper';
+import { useFocusEffect } from '@react-navigation/native';
 
+import { AppContext } from '../context/AppContext';
 import { getGreeting } from '../utils/dateUtils';
+import { getCurrentMonthStartEnd } from '../utils/dateUtils';
 import ScriptureCard from '../components/ScriptureCard';
+import SummaryCard from '../components/SummaryCard';
+import PendingTitheCard from '../components/PendingTitheCard';
+import { getDonationTotal, getPendingTitheTotal } from '../database/Database';
 
 const HomeScreen = ({ navigation }) => {
   const theme = useTheme();
+  const { settings } = useContext(AppContext);
   const greeting = getGreeting();
+
+  const [monthlyTotal, setMonthlyTotal] = useState(0);
+  const [pendingTithe, setPendingTithe] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useFocusEffect(
+    useCallback(() => {
+      const loadDashboardData = async () => {
+        try {
+          setIsLoading(true);
+          
+          // Get this month's giving total
+          const { start, end } = getCurrentMonthStartEnd();
+          const total = await getDonationTotal(start, end);
+          setMonthlyTotal(total);
+
+          // Get pending tithe if income tracking is enabled
+          if (settings.incomeTrackingEnabled === 'true') {
+            const tithe = await getPendingTitheTotal();
+            setPendingTithe(tithe);
+          }
+        } catch (error) {
+          if (__DEV__) {
+            console.error('Error loading dashboard data:', error);
+          }
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      loadDashboardData();
+    }, [settings.incomeTrackingEnabled])
+  );
 
   return (
     <View style={styles.container}>
@@ -18,52 +58,46 @@ const HomeScreen = ({ navigation }) => {
         <Text style={[styles.greeting, { color: theme.colors.primary }]}>
           {greeting}
         </Text>
-        
-        <Card style={styles.welcomeCard}>
-          <Card.Title title="Welcome to Stewardship Keeper" />
-          <Card.Content>
-            <Text style={styles.welcomeText}>
-              Track your tithes and offerings, monitor your giving progress, and organize your 
-              charitable donations all in one place.
-            </Text>
-            <View style={styles.buttonContainer}>
-              <Button 
-                mode="contained" 
-                style={styles.button}
-                onPress={() => navigation.navigate('Giving')}
-              >
-                Start Tracking
-              </Button>
-            </View>
-          </Card.Content>
-        </Card>
+
+        <SummaryCard
+          title="This Month's Giving"
+          amount={monthlyTotal}
+          icon="heart"
+          currency={settings.currency}
+          onPress={() => navigation.navigate('Giving')}
+        />
+
+        {settings.incomeTrackingEnabled === 'true' && (
+          <PendingTitheCard
+            amount={pendingTithe}
+            percentage={settings.tithePercentage}
+            currency={settings.currency}
+            onPress={() => navigation.navigate('Income')}
+          />
+        )}
+
+        <View style={styles.quickActions}>
+          <Button
+            mode="contained"
+            icon="plus"
+            onPress={() => navigation.navigate('Giving', { showAddDonation: true })}
+            style={styles.actionButton}
+          >
+            Log Donation
+          </Button>
+          {settings.incomeTrackingEnabled === 'true' && (
+            <Button
+              mode="outlined"
+              icon="plus"
+              onPress={() => navigation.navigate('Income', { showAddIncome: true })}
+              style={styles.actionButton}
+            >
+              Log Income
+            </Button>
+          )}
+        </View>
         
         <ScriptureCard />
-        
-        <Card style={styles.featuresCard}>
-          <Card.Title title="Features" />
-          <Card.Content>
-            <View style={styles.featureItem}>
-              <Text style={styles.featureTitle}>• Donation Tracking</Text>
-              <Text>Record and categorize all your charitable giving</Text>
-            </View>
-            
-            <View style={styles.featureItem}>
-              <Text style={styles.featureTitle}>• Income & Tithe Planning</Text>
-              <Text>Calculate tithes based on your income</Text>
-            </View>
-            
-            <View style={styles.featureItem}>
-              <Text style={styles.featureTitle}>• Recipient Management</Text>
-              <Text>Organize your giving by recipient and category</Text>
-            </View>
-            
-            <View style={styles.featureItem}>
-              <Text style={styles.featureTitle}>• Reporting & Analytics</Text>
-              <Text>Visualize your giving patterns and impact</Text>
-            </View>
-          </Card.Content>
-        </Card>
       </ScrollView>
     </View>
   );
@@ -85,31 +119,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 16,
   },
-  welcomeCard: {
-    marginBottom: 16,
+  quickActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginVertical: 16,
+    gap: 12,
   },
-  welcomeText: {
-    fontSize: 16,
-    lineHeight: 24,
-    marginBottom: 16,
-  },
-  buttonContainer: {
-    alignItems: 'center',
-  },
-  button: {
-    width: '80%',
-    marginVertical: 10,
-  },
-  featuresCard: {
-    marginTop: 16,
-  },
-  featureItem: {
-    marginBottom: 16,
-  },
-  featureTitle: {
-    fontWeight: 'bold',
-    fontSize: 16,
-    marginBottom: 4,
+  actionButton: {
+    flex: 1,
   },
 });
 
