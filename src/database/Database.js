@@ -61,6 +61,20 @@ export const initDatabase = async () => {
       logger.log(`Default setting ${setting.key} inserted or already exists`);
     }
 
+    // Create indexes for frequently queried columns
+    await database.execAsync(
+      `CREATE INDEX IF NOT EXISTS idx_donations_date ON donations(date)`
+    );
+    await database.execAsync(
+      `CREATE INDEX IF NOT EXISTS idx_income_date ON income(date)`
+    );
+    await database.execAsync(
+      `CREATE INDEX IF NOT EXISTS idx_donations_recipientId ON donations(recipientId)`
+    );
+    await database.execAsync(
+      `CREATE INDEX IF NOT EXISTS idx_income_processed ON income(processed)`
+    );
+
     logger.log('Database initialized successfully');
   } catch (error) {
     logger.error('Error during database initialization:', error);
@@ -152,6 +166,50 @@ export const getDonationTotal = async (startDate, endDate) => {
 };
 
 /**
+ * Update an existing donation
+ * @param {Object} donation Donation object with id
+ * @returns {Promise<void>}
+ */
+export const updateDonation = async (donation) => {
+  const database = getDatabase();
+  try {
+    await database.runAsync(
+      `UPDATE donations 
+       SET recipientId = ?, amount = ?, date = ?, type = ?, notes = ?, category = ?
+       WHERE id = ?`,
+      donation.recipientId,
+      donation.amount,
+      donation.date,
+      donation.type,
+      donation.notes || '',
+      donation.category || 'General',
+      donation.id
+    );
+  } catch (error) {
+    logger.error('Error updating donation:', error);
+    throw error;
+  }
+};
+
+/**
+ * Delete a donation
+ * @param {number} id Donation ID to delete
+ * @returns {Promise<void>}
+ */
+export const deleteDonation = async (id) => {
+  const database = getDatabase();
+  try {
+    await database.runAsync(
+      `DELETE FROM donations WHERE id = ?`,
+      id
+    );
+  } catch (error) {
+    logger.error('Error deleting donation:', error);
+    throw error;
+  }
+};
+
+/**
  * Add income record
  * @param {Object} income Income object to add
  * @returns {Promise<number>} ID of the new income record
@@ -213,6 +271,49 @@ export const markIncomeAsProcessed = async (incomeId) => {
     );
   } catch (error) {
     logger.error('Error marking income as processed:', error);
+    throw error;
+  }
+};
+
+/**
+ * Update an existing income record
+ * @param {Object} income Income object with id
+ * @returns {Promise<void>}
+ */
+export const updateIncome = async (income) => {
+  const database = getDatabase();
+  try {
+    await database.runAsync(
+      `UPDATE income 
+       SET amount = ?, date = ?, source = ?, notes = ?, processed = ?
+       WHERE id = ?`,
+      income.amount,
+      income.date,
+      income.source,
+      income.notes || '',
+      income.processed ? 1 : 0,
+      income.id
+    );
+  } catch (error) {
+    logger.error('Error updating income:', error);
+    throw error;
+  }
+};
+
+/**
+ * Delete an income record
+ * @param {number} id Income ID to delete
+ * @returns {Promise<void>}
+ */
+export const deleteIncome = async (id) => {
+  const database = getDatabase();
+  try {
+    await database.runAsync(
+      `DELETE FROM income WHERE id = ?`,
+      id
+    );
+  } catch (error) {
+    logger.error('Error deleting income:', error);
     throw error;
   }
 };

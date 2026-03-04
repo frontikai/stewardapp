@@ -21,6 +21,8 @@ import PendingTitheCard from '../components/PendingTitheCard';
 import { 
   getIncome, 
   addIncome, 
+  updateIncome,
+  deleteIncome,
   markIncomeAsProcessed,
   getPendingTitheTotal
 } from '../database/Database';
@@ -32,17 +34,19 @@ const IncomeScreen = ({ navigation, route }) => {
   const [income, setIncome] = useState([]);
   const [pendingTithe, setPendingTithe] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
-  const [filter, setFilter] = useState('pending'); // 'all', 'pending', 'processed'
-  const [showAddIncome, setShowAddIncome] = useState(false);
+  const [filter, setFilter] = useState('pending');
+  const [showIncomeForm, setShowIncomeForm] = useState(false);
+  const [editingIncome, setEditingIncome] = useState(null);
   const [selectedIncome, setSelectedIncome] = useState(null);
   const [showProcessDialog, setShowProcessDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deletingIncome, setDeletingIncome] = useState(null);
   
   const filters = ['all', 'pending', 'processed'];
   
   const loadIncome = async () => {
     try {
       setRefreshing(true);
-      // Get income for last 12 months
       const today = new Date();
       const twelveMonthsAgo = new Date();
       twelveMonthsAgo.setMonth(today.getMonth() - 12);
@@ -53,7 +57,6 @@ const IncomeScreen = ({ navigation, route }) => {
       );
       setIncome(result);
       
-      // Get pending tithe total
       const titheAmount = await getPendingTitheTotal();
       setPendingTithe(titheAmount);
     } catch (error) {
@@ -69,21 +72,45 @@ const IncomeScreen = ({ navigation, route }) => {
         loadIncome();
       }
       
-      // Check if navigated with the showAddIncome param
       if (route.params?.showAddIncome) {
-        setShowAddIncome(true);
+        setEditingIncome(null);
+        setShowIncomeForm(true);
         navigation.setParams({ showAddIncome: undefined });
       }
     }, [route.params, settings.incomeTrackingEnabled])
   );
   
-  const handleAddIncome = async (income) => {
+  const handleAddIncome = async (incomeData) => {
     try {
-      await addIncome(income);
-      setShowAddIncome(false);
+      await addIncome(incomeData);
+      setShowIncomeForm(false);
+      setEditingIncome(null);
       loadIncome();
     } catch (error) {
       console.error('Error adding income:', error);
+    }
+  };
+
+  const handleUpdateIncome = async (incomeData) => {
+    try {
+      await updateIncome({ ...incomeData, id: editingIncome.id });
+      setShowIncomeForm(false);
+      setEditingIncome(null);
+      loadIncome();
+    } catch (error) {
+      console.error('Error updating income:', error);
+    }
+  };
+
+  const handleDeleteIncome = async () => {
+    if (!deletingIncome) return;
+    try {
+      await deleteIncome(deletingIncome.id);
+      setShowDeleteDialog(false);
+      setDeletingIncome(null);
+      loadIncome();
+    } catch (error) {
+      console.error('Error deleting income:', error);
     }
   };
   
@@ -98,6 +125,16 @@ const IncomeScreen = ({ navigation, route }) => {
     } catch (error) {
       console.error('Error processing income:', error);
     }
+  };
+
+  const openEditForm = (item) => {
+    setEditingIncome(item);
+    setShowIncomeForm(true);
+  };
+
+  const openDeleteConfirmation = (item) => {
+    setDeletingIncome(item);
+    setShowDeleteDialog(true);
   };
   
   const onRefresh = () => {
@@ -128,20 +165,17 @@ const IncomeScreen = ({ navigation, route }) => {
   }, {});
   
   const sections = Object.values(groupedIncome).sort((a, b) => {
-    // Extract month and year from the title
     const [aMonth, aYear] = a.title.split(' ');
     const [bMonth, bYear] = b.title.split(' ');
     
-    // Compare year first, then month
     if (aYear !== bYear) {
-      return bYear - aYear; // Sort years in descending order
+      return bYear - aYear;
     }
     
-    // Convert month names to numbers for comparison
     const months = ["January", "February", "March", "April", "May", "June",
       "July", "August", "September", "October", "November", "December"];
     
-    return months.indexOf(bMonth) - months.indexOf(aMonth); // Sort months in descending order
+    return months.indexOf(bMonth) - months.indexOf(aMonth);
   });
   
   const renderItem = ({ item }) => (
@@ -156,23 +190,35 @@ const IncomeScreen = ({ navigation, route }) => {
               <List.Icon {...props} icon={incomeItem.processed ? "check-circle" : "circle"} />
             )}
             right={props => (
-              <View style={styles.rightContent}>
+              <View style={styles.itemRight}>
                 <Text style={styles.amountText}>
                   {settings.currency} {incomeItem.amount.toFixed(2)}
                 </Text>
-                {!incomeItem.processed && (
+                <View style={styles.itemActions}>
+                  {!incomeItem.processed && (
+                    <IconButton
+                      icon="cash"
+                      size={18}
+                      onPress={() => {
+                        setSelectedIncome(incomeItem);
+                        setShowProcessDialog(true);
+                      }}
+                    />
+                  )}
                   <IconButton
-                    icon="cash"
-                    size={20}
-                    onPress={() => {
-                      setSelectedIncome(incomeItem);
-                      setShowProcessDialog(true);
-                    }}
-                    color={theme.colors.primary}
+                    icon="pencil"
+                    size={18}
+                    onPress={() => openEditForm(incomeItem)}
                   />
-                )}
+                  <IconButton
+                    icon="delete"
+                    size={18}
+                    onPress={() => openDeleteConfirmation(incomeItem)}
+                  />
+                </View>
               </View>
             )}
+            onPress={() => openEditForm(incomeItem)}
           />
           {index < item.data.length - 1 && <Divider />}
         </React.Fragment>
@@ -251,7 +297,10 @@ const IncomeScreen = ({ navigation, route }) => {
           </Text>
           <Button 
             mode="contained" 
-            onPress={() => setShowAddIncome(true)}
+            onPress={() => {
+              setEditingIncome(null);
+              setShowIncomeForm(true);
+            }}
             style={{marginTop: 16}}
           >
             Add Your First Income
@@ -262,20 +311,30 @@ const IncomeScreen = ({ navigation, route }) => {
       <FAB
         style={[styles.fab, { backgroundColor: theme.colors.primary }]}
         icon="plus"
-        onPress={() => setShowAddIncome(true)}
+        onPress={() => {
+          setEditingIncome(null);
+          setShowIncomeForm(true);
+        }}
       />
       
       <Portal>
         <Dialog
-          visible={showAddIncome}
-          onDismiss={() => setShowAddIncome(false)}
+          visible={showIncomeForm}
+          onDismiss={() => {
+            setShowIncomeForm(false);
+            setEditingIncome(null);
+          }}
           style={styles.dialog}
         >
-          <Dialog.Title>Add Income</Dialog.Title>
+          <Dialog.Title>{editingIncome ? 'Edit Income' : 'Add Income'}</Dialog.Title>
           <Dialog.Content>
             <IncomeForm 
-              onSubmit={handleAddIncome}
-              onCancel={() => setShowAddIncome(false)}
+              onSubmit={editingIncome ? handleUpdateIncome : handleAddIncome}
+              onCancel={() => {
+                setShowIncomeForm(false);
+                setEditingIncome(null);
+              }}
+              initialValues={editingIncome || {}}
               tithePercentage={Number(settings.tithePercentage)}
             />
           </Dialog.Content>
@@ -301,6 +360,37 @@ const IncomeScreen = ({ navigation, route }) => {
           <Dialog.Actions>
             <Button onPress={() => setShowProcessDialog(false)}>Cancel</Button>
             <Button onPress={handleProcessIncome} mode="contained">Mark as Tithed</Button>
+          </Dialog.Actions>
+        </Dialog>
+
+        <Dialog
+          visible={showDeleteDialog}
+          onDismiss={() => {
+            setShowDeleteDialog(false);
+            setDeletingIncome(null);
+          }}
+        >
+          <Dialog.Title>Delete Income</Dialog.Title>
+          <Dialog.Content>
+            <Text>
+              Are you sure you want to delete this income record
+              {deletingIncome ? ` of ${settings.currency} ${deletingIncome.amount.toFixed(2)}` : ''}?
+              This action cannot be undone.
+            </Text>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={() => {
+              setShowDeleteDialog(false);
+              setDeletingIncome(null);
+            }}>
+              Cancel
+            </Button>
+            <Button 
+              onPress={handleDeleteIncome} 
+              textColor={theme.colors.error}
+            >
+              Delete
+            </Button>
           </Dialog.Actions>
         </Dialog>
       </Portal>
@@ -355,12 +445,15 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: 'rgba(0, 0, 0, 0.54)',
   },
-  rightContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  itemRight: {
+    alignItems: 'flex-end',
+    justifyContent: 'center',
   },
   amountText: {
     fontWeight: 'bold',
+  },
+  itemActions: {
+    flexDirection: 'row',
   },
   fab: {
     position: 'absolute',

@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { View, StyleSheet, FlatList, RefreshControl, ScrollView } from 'react-native';
+import { View, StyleSheet, FlatList, RefreshControl, ScrollView, Alert } from 'react-native';
 import { 
   Text, 
   FAB, 
@@ -18,7 +18,7 @@ import { Feather } from '@expo/vector-icons';
 
 import { AppContext } from '../context/AppContext';
 import DonationForm from '../components/DonationForm';
-import { getDonations, addDonation } from '../database/Database';
+import { getDonations, addDonation, updateDonation, deleteDonation } from '../database/Database';
 import { formatDate } from '../utils/dateUtils';
 
 const GivingScreen = ({ navigation, route }) => {
@@ -28,7 +28,10 @@ const GivingScreen = ({ navigation, route }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState('all');
-  const [showAddDonation, setShowAddDonation] = useState(false);
+  const [showDonationForm, setShowDonationForm] = useState(false);
+  const [editingDonation, setEditingDonation] = useState(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deletingDonation, setDeletingDonation] = useState(null);
   
   const filters = ['all', 'tithe', 'offering', 'charity'];
   
@@ -57,7 +60,8 @@ const GivingScreen = ({ navigation, route }) => {
       loadDonations();
       // Check if navigated with the showAddDonation param
       if (route.params?.showAddDonation) {
-        setShowAddDonation(true);
+        setEditingDonation(null);
+        setShowDonationForm(true);
         navigation.setParams({ showAddDonation: undefined });
       }
     }, [route.params])
@@ -66,11 +70,45 @@ const GivingScreen = ({ navigation, route }) => {
   const handleAddDonation = async (donation) => {
     try {
       await addDonation(donation);
-      setShowAddDonation(false);
+      setShowDonationForm(false);
+      setEditingDonation(null);
       loadDonations();
     } catch (error) {
       console.error('Error adding donation:', error);
     }
+  };
+
+  const handleUpdateDonation = async (donation) => {
+    try {
+      await updateDonation({ ...donation, id: editingDonation.id });
+      setShowDonationForm(false);
+      setEditingDonation(null);
+      loadDonations();
+    } catch (error) {
+      console.error('Error updating donation:', error);
+    }
+  };
+
+  const handleDeleteDonation = async () => {
+    if (!deletingDonation) return;
+    try {
+      await deleteDonation(deletingDonation.id);
+      setShowDeleteDialog(false);
+      setDeletingDonation(null);
+      loadDonations();
+    } catch (error) {
+      console.error('Error deleting donation:', error);
+    }
+  };
+
+  const openEditForm = (donation) => {
+    setEditingDonation(donation);
+    setShowDonationForm(true);
+  };
+
+  const openDeleteConfirmation = (donation) => {
+    setDeletingDonation(donation);
+    setShowDeleteDialog(true);
   };
   
   const onRefresh = () => {
@@ -111,20 +149,17 @@ const GivingScreen = ({ navigation, route }) => {
   }, {});
   
   const sections = Object.values(groupedDonations).sort((a, b) => {
-    // Extract month and year from the title
     const [aMonth, aYear] = a.title.split(' ');
     const [bMonth, bYear] = b.title.split(' ');
     
-    // Compare year first, then month
     if (aYear !== bYear) {
-      return bYear - aYear; // Sort years in descending order
+      return bYear - aYear;
     }
     
-    // Convert month names to numbers for comparison
     const months = ["January", "February", "March", "April", "May", "June",
       "July", "August", "September", "October", "November", "December"];
     
-    return months.indexOf(bMonth) - months.indexOf(aMonth); // Sort months in descending order
+    return months.indexOf(bMonth) - months.indexOf(aMonth);
   });
   
   const renderItem = ({ item }) => (
@@ -137,10 +172,25 @@ const GivingScreen = ({ navigation, route }) => {
             description={`${donation.date} - ${donation.type}${donation.notes ? `\n${donation.notes}` : ''}`}
             left={props => <List.Icon {...props} icon="gift-outline" />}
             right={props => (
-              <Text {...props} style={{alignSelf: 'center', fontWeight: 'bold'}}>
-                {settings.currency} {donation.amount.toFixed(2)}
-              </Text>
+              <View style={styles.itemRight}>
+                <Text style={styles.amountText}>
+                  {settings.currency} {donation.amount.toFixed(2)}
+                </Text>
+                <View style={styles.itemActions}>
+                  <IconButton
+                    icon="pencil"
+                    size={18}
+                    onPress={() => openEditForm(donation)}
+                  />
+                  <IconButton
+                    icon="delete"
+                    size={18}
+                    onPress={() => openDeleteConfirmation(donation)}
+                  />
+                </View>
+              </View>
             )}
+            onPress={() => openEditForm(donation)}
           />
           {index < item.data.length - 1 && <Divider />}
         </React.Fragment>
@@ -197,7 +247,10 @@ const GivingScreen = ({ navigation, route }) => {
           </Text>
           <Button 
             mode="contained" 
-            onPress={() => setShowAddDonation(true)}
+            onPress={() => {
+              setEditingDonation(null);
+              setShowDonationForm(true);
+            }}
             style={{marginTop: 16}}
           >
             Add Your First Donation
@@ -208,22 +261,63 @@ const GivingScreen = ({ navigation, route }) => {
       <FAB
         style={[styles.fab, { backgroundColor: theme.colors.primary }]}
         icon="plus"
-        onPress={() => setShowAddDonation(true)}
+        onPress={() => {
+          setEditingDonation(null);
+          setShowDonationForm(true);
+        }}
       />
       
       <Portal>
         <Dialog
-          visible={showAddDonation}
-          onDismiss={() => setShowAddDonation(false)}
+          visible={showDonationForm}
+          onDismiss={() => {
+            setShowDonationForm(false);
+            setEditingDonation(null);
+          }}
           style={styles.dialog}
         >
-          <Dialog.Title>Add Donation</Dialog.Title>
+          <Dialog.Title>{editingDonation ? 'Edit Donation' : 'Add Donation'}</Dialog.Title>
           <Dialog.Content>
             <DonationForm 
-              onSubmit={handleAddDonation}
-              onCancel={() => setShowAddDonation(false)}
+              onSubmit={editingDonation ? handleUpdateDonation : handleAddDonation}
+              onCancel={() => {
+                setShowDonationForm(false);
+                setEditingDonation(null);
+              }}
+              initialValues={editingDonation || {}}
             />
           </Dialog.Content>
+        </Dialog>
+
+        <Dialog
+          visible={showDeleteDialog}
+          onDismiss={() => {
+            setShowDeleteDialog(false);
+            setDeletingDonation(null);
+          }}
+        >
+          <Dialog.Title>Delete Donation</Dialog.Title>
+          <Dialog.Content>
+            <Text>
+              Are you sure you want to delete this donation
+              {deletingDonation ? ` of ${settings.currency} ${deletingDonation.amount.toFixed(2)}` : ''}?
+              This action cannot be undone.
+            </Text>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={() => {
+              setShowDeleteDialog(false);
+              setDeletingDonation(null);
+            }}>
+              Cancel
+            </Button>
+            <Button 
+              onPress={handleDeleteDonation} 
+              textColor={theme.colors.error}
+            >
+              Delete
+            </Button>
+          </Dialog.Actions>
         </Dialog>
       </Portal>
     </View>
@@ -265,6 +359,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
     color: 'rgba(0, 0, 0, 0.54)',
+  },
+  itemRight: {
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+  },
+  amountText: {
+    fontWeight: 'bold',
+  },
+  itemActions: {
+    flexDirection: 'row',
   },
   fab: {
     position: 'absolute',
