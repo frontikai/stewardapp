@@ -10,9 +10,13 @@ const SummaryCard = ({ title, amount, icon, currency = 'USD', onPress }) => {
     <Card 
       style={styles.card} 
       onPress={onPress}
+      accessible={true}
+      accessibilityRole="button"
+      accessibilityLabel={`${title}: ${currency} ${parseFloat(amount).toFixed(2)}`}
+      accessibilityHint={onPress ? "Double tap to view details" : undefined}
     >
       <Card.Content style={styles.content}>
-        <View style={styles.iconContainer}>
+        <View style={[styles.iconContainer, { backgroundColor: theme.colors.primaryContainer }]} accessibilityElementsHidden={true}>
           <Feather name={icon} size={24} color={theme.colors.primary} />
         </View>
         <View style={styles.textContainer}>
@@ -39,7 +43,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+    opacity: 0.9,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,

@@ -34,7 +34,6 @@ const styles = StyleSheet.create({
     width: '100%',
     borderRadius: 4,
     overflow: 'hidden',
-    backgroundColor: 'rgba(0, 0, 0, 0.1)',
   },
   progress: {
     height: '100%',

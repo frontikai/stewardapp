@@ -7,7 +7,14 @@ const PendingTitheCard = ({ amount, percentage = 10, currency = 'USD', onPress }
   const theme = useTheme();
   
   return (
-    <Card style={styles.card} onPress={onPress}>
+    <Card 
+      style={styles.card} 
+      onPress={onPress}
+      accessible={true}
+      accessibilityRole={onPress ? "button" : "summary"}
+      accessibilityLabel={`Pending tithe: ${currency} ${parseFloat(amount).toFixed(2)}, based on ${percentage}% tithe rate`}
+      accessibilityHint={onPress ? "Double tap to view income" : undefined}
+    >
       <Card.Content>
         <View style={styles.headerContainer}>
           <View style={styles.iconContainer}>

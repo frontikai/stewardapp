@@ -58,13 +58,5 @@ export const SCHEMA = {
     notificationId: 'TEXT',
     createdAt: 'TEXT DEFAULT CURRENT_TIMESTAMP',
   },
-  
-  // Categories for donations and recipients
-  categories: {
-    id: 'INTEGER PRIMARY KEY AUTOINCREMENT',
-    name: 'TEXT NOT NULL UNIQUE',
-    color: 'TEXT',
-    isSystem: 'INTEGER DEFAULT 0',
-    createdAt: 'TEXT DEFAULT CURRENT_TIMESTAMP',
-  },
+
 };
