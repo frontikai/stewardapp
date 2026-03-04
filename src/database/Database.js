@@ -51,6 +51,8 @@ export const initDatabase = async () => {
       { key: 'incomeTrackingEnabled', value: 'true' },
       { key: 'notificationsEnabled', value: 'true' },
       { key: 'themeSetting', value: 'auto' },
+      { key: 'monthlyGoal', value: '500' },
+      { key: 'annualGoal', value: '6000' },
     ];
 
     for (const setting of defaultSettings) {
